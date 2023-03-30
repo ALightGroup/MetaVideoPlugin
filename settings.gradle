@@ -17,7 +17,7 @@ dependencyResolutionManagement {
 
   versionCatalogs {
     libs {
-      from("com.alg.plugin.version:catalog:0.0.1")
+      from("com.alg.plugin.version:catalog:0.0.2")
     }
   }
 

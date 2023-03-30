@@ -5,20 +5,50 @@ plugins {
 
 android {
   namespace 'com.alg.meta.plugin.video'
-  compileSdk 33
+  compileSdkVersion libs.versions.compilesdk.get().toInteger()
 
   defaultConfig {
-    minSdk 24
-    targetSdk 33
+    minSdk libs.versions.minSdk.get().toInteger()
+    targetSdk libs.versions.targetsdk.get().toInteger()
 
     testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     consumerProguardFiles "consumer-rules.pro"
+
+    externalNativeBuild {
+      cmake {
+        arguments "-DCMAKE_FIND_ROOT_PATH=", "-DANDROID_STL=c++_static",
+            "-DANDROID_TOOLCHAIN=clang", "-DANDROID_ARM_NEON=TRUE",
+            "-DUSE_CHIPMUNK=TRUE", "-DUSE_BULLET=TRUE", "-DBUILD_JS_LIBS=TRUE"
+        cppFlags "-frtti -fexceptions"
+      }
+    }
+    ndk {
+      abiFilters = ['arm64-v8a']
+    }
+  }
+
+  externalNativeBuild {
+    cmake {
+      path "CMakeLists.txt"
+      version "3.18.1"
+    }
   }
 
   buildTypes {
     release {
       minifyEnabled false
       proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+    }
+
+    debug {
+      debuggable true
+      jniDebuggable true
+      renderscriptDebuggable true
+      externalNativeBuild {
+        ndkBuild {
+          arguments 'NDK_DEBUG=1 -o'
+        }
+      }
     }
   }
   compileOptions {
@@ -28,14 +58,20 @@ android {
   kotlinOptions {
     jvmTarget = '1.8'
   }
+
+  ndkVersion "17.0.4754217"
+
+  sourceSets {
+    main {
+      jni.srcDirs = ["src/main/cpp"]
+    }
+  }
 }
 
 dependencies {
-
-  implementation 'androidx.core:core-ktx:1.7.0'
-  implementation 'androidx.appcompat:appcompat:1.6.1'
-  implementation 'com.google.android.material:material:1.8.0'
-  testImplementation 'junit:junit:4.13.2'
-  androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-  androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+  testImplementation libs.junit
+  androidTestImplementation libs.bundles.android.test
+  implementation libs.bundles.alg
+  implementation "com.alg.plugin:frame:0.0.1"
+  implementation 'com.google.android.exoplayer:exoplayer-core:2.18.5'
 }
