@@ -66,6 +66,15 @@ android {
       jni.srcDirs = ["src/main/cpp"]
     }
   }
+
+  buildFeatures {
+    compose = true
+  }
+
+  composeOptions {
+    kotlinCompilerExtensionVersion libs.versions.kotlinCompilerExtensionVersion.get()
+  }
+
 }
 
 dependencies {
