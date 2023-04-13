@@ -26,20 +26,30 @@ set(ARCHITECTURE ${ANDROID_ABI})
 
 # Additional flags needed for "arm64-v8a" from NDK 23.1.7779620 and above.
 # See https://github.com/google/ExoPlayer/issues/9933#issuecomment-1029775358.
-if(${ANDROID_ABI} MATCHES "arm64-v8a")
-    set(CMAKE_CXX_FLAGS "-Wl,-Bsymbolic")
+#if(${ANDROID_ABI} MATCHES "arm64-v8a")
+#    set(CMAKE_CXX_FLAGS "-Wl,-Bsymbolic")
+#endif()
+
+if (${ANDROID_ABI} STREQUAL "x86_64")
+    include_directories(${ANDROID_SYSROOT}/usr/include/x86_64-linux-android)
+elseif (${ANDROID_ABI} STREQUAL "x86")
+    include_directories(${ANDROID_SYSROOT}/usr/include/i686-linux-android)
+elseif (${ANDROID_ABI} STREQUAL "arm64-v8a")
+    include_directories(${ANDROID_SYSROOT}/usr/include/aarch64-linux-android)
+elseif (${ANDROID_ABI} STREQUAL "armeabi-v7a")
+    include_directories(${ANDROID_SYSROOT}/usr/include/arm-linux-androideabi)
 endif()
 
 # 链接第三方so库(全路径)
-link_libraries(${CMAKE_CURRENT_SOURCE_DIR}/main/jniLibs/${ANDROID_ABI}/libavcodec.so
-        ${CMAKE_CURRENT_SOURCE_DIR}/main/jniLibs/${ANDROID_ABI}/libavdevice.so
-        ${CMAKE_CURRENT_SOURCE_DIR}/main/jniLibs/${ANDROID_ABI}/libavfilter.so
-        ${CMAKE_CURRENT_SOURCE_DIR}/main/jniLibs/${ANDROID_ABI}/libavformat.so
-        ${CMAKE_CURRENT_SOURCE_DIR}/main/jniLibs/${ANDROID_ABI}/libavutil.so
-        ${CMAKE_CURRENT_SOURCE_DIR}/main/jniLibs/${ANDROID_ABI}/libswresample.so
-        ${CMAKE_CURRENT_SOURCE_DIR}/main/jniLibs/${ANDROID_ABI}/libswscale.so
-        ${CMAKE_CURRENT_SOURCE_DIR}/main/jniLibs/${ANDROID_ABI}/libgsm.a
-        ${CMAKE_CURRENT_SOURCE_DIR}/main/jniLibs/${ANDROID_ABI}/libz.a
+link_libraries(${CMAKE_CURRENT_SOURCE_DIR}/src/main/jniLibs/${ANDROID_ABI}/libavcodec.so
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/main/jniLibs/${ANDROID_ABI}/libavdevice.so
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/main/jniLibs/${ANDROID_ABI}/libavfilter.so
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/main/jniLibs/${ANDROID_ABI}/libavformat.so
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/main/jniLibs/${ANDROID_ABI}/libavutil.so
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/main/jniLibs/${ANDROID_ABI}/libswresample.so
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/main/jniLibs/${ANDROID_ABI}/libswscale.so
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/main/jniLibs/${ANDROID_ABI}/libgsm.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/main/jniLibs/${ANDROID_ABI}/libz.a
         )
 
 
@@ -68,7 +78,7 @@ target_link_libraries(ffmpegJNI
         PRIVATE swresample
         PRIVATE avcodec
         PRIVATE avutil
-        PRIVATE ${android_log_lib})
+        PRIVATE ${log-lib})
 
 
 

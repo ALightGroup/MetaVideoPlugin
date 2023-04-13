@@ -1,6 +1,10 @@
 package com.alg.meta.plugin.video
 
 import android.os.Bundle
+import androidx.activity.compose.setContent
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
 import com.alg.meta.plugin.metaframe.base.BaseActivity
 
 /**
@@ -10,6 +14,19 @@ import com.alg.meta.plugin.metaframe.base.BaseActivity
  **/
 class PlayerActivity:BaseActivity() {
   override fun initData(savedInstanceState: Bundle?) {
-    TODO("Not yet implemented")
+    setContent {
+      Greeting("123")
+    }
   }
+}
+
+@Composable
+fun Greeting(name: String) {
+  Text (text = "Hello $name!11wdsdsdss")
+}
+
+@Preview
+@Composable
+fun PreviewGreeting() {
+  Greeting("Android")
 }

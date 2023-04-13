@@ -18,7 +18,7 @@
  */
 #include <android/log.h>
 #include <jni.h>
-#include <stdlib.h>
+#include <cstdlib>
 
 extern "C" {
 #ifdef __cplusplus
@@ -26,18 +26,15 @@ extern "C" {
 #ifdef _STDINT_H
 #undef _STDINT_H
 #endif
-#include <stdint.h>
+#include <cstdint>
 #endif
 #include <libavcodec/avcodec.h>
 #include <libavutil/channel_layout.h>
 #include <libavutil/error.h>
 #include <libavutil/opt.h>
+#include "alog.h"
 #include <libswresample/swresample.h>
 }
-
-#define LOG_TAG "ffmpeg_jni"
-#define LOGE(...) \
-  ((void)__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__))
 
 #define LIBRARY_FUNC(RETURN_TYPE, NAME, ...)                              \
   extern "C" {                                                            \
