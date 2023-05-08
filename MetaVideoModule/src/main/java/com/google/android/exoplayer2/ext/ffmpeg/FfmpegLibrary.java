@@ -36,6 +36,7 @@ public final class FfmpegLibrary {
       new LibraryLoader("ffmpegJNI") {
         @Override
         protected void loadLibrary(String name) {
+          Log.d("FfmpegLibrary", "加载ffmpeg 库");
           System.loadLibrary(name);
         }
       };

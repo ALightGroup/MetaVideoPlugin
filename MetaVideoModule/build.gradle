@@ -83,5 +83,9 @@ dependencies {
   implementation libs.bundles.alg
   implementation libs.bundles.compose
   implementation "com.alg.plugin:frame:0.0.1"
-  implementation 'com.google.android.exoplayer:exoplayer-core:2.18.5'
+  def exoVersion = "2.18.6"
+  implementation "com.google.android.exoplayer:exoplayer-core:${exoVersion}"
+  implementation "com.google.android.exoplayer:exoplayer-ui:${exoVersion}"
+  implementation "com.google.android.exoplayer:exoplayer-rtsp:${exoVersion}"
+  implementation "com.google.android.exoplayer:exoplayer-hls:${exoVersion}"
 }
