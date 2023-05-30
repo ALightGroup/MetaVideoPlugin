@@ -6,25 +6,27 @@ import android.view.View
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.key
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshotFlow
+import androidx.compose.material3.Slider
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.runtime.getValue
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.boundsInParent
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.alg.meta.plugin.video.ControllerVisibility.Invisible
 import com.alg.meta.plugin.video.ControllerVisibility.PartiallyVisible
@@ -34,6 +36,9 @@ import com.alg.meta.plugin.video.ShowBuffering.WhenPlaying
 import com.google.android.exoplayer2.PlaybackException
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.text.CueGroup
+import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 
 enum class SurfaceType {
   None,
@@ -63,7 +68,9 @@ fun Media(state: MediaState,
   overlay: @Composable (() -> Unit)? = null,
   controllerHideOnTouch: Boolean = true,
   controllerAutoShow: Boolean = true,
-  controller: @Composable ((MediaState) -> Unit)? = null){
+  controller: @Composable ((MediaState) -> Unit)? = null,
+  audioVolumeChange:@Composable ((Float,Float) -> Unit)? = null,
+  brightnessChange:@Composable ((Float,Float) -> Unit)? = null){
 
   if (showBuffering != ShowBuffering.Never) require(buffering != null) {
     "buffering should not be null if showBuffering is 'ShowBuffering.$showBuffering'"
@@ -78,9 +85,15 @@ fun Media(state: MediaState,
   SideEffect {
     state.controllerAutoShow = controllerAutoShow
   }
+  var offset by remember { mutableStateOf(0f) }
+  val isVolume = remember { mutableStateOf(false)}
+  var boxRect = remember { Rect.Zero }
 
   Box(
     modifier = modifier
+      .onGloballyPositioned {
+        boxRect = it.boundsInParent()
+      }
       .clickable(
         indication = null,
         interactionSource = remember { MutableInteractionSource() }
@@ -94,6 +107,19 @@ fun Media(state: MediaState,
             PartiallyVisible -> Visible
             Invisible -> Visible
           }
+        }
+      }
+      .pointerInput(Unit) {
+        detectVerticalDragGestures(
+          onDragStart = {
+
+          },
+          onDragEnd = {
+            offset = 0f
+          }
+        ) { change, dragAmount ->
+          isVolume.value = change.position.x>(boxRect.width/2)
+          offset += dragAmount
         }
       }
   ){
@@ -150,6 +176,23 @@ fun Media(state: MediaState,
           }
       }
 
+    }
+
+    val value = 180.dp.value
+    val changeAbs = min(abs(offset),value) /value
+    if (offset>0){
+      if (isVolume.value){
+        audioVolumeChange?.invoke(offset,-changeAbs)
+      }else{
+        brightnessChange?.invoke(offset,-changeAbs)
+      }
+
+    }else{
+      if (isVolume.value){
+        audioVolumeChange?.invoke(offset,changeAbs)
+      }else{
+        brightnessChange?.invoke(offset,changeAbs)
+      }
     }
 
    // artwork in audio stream

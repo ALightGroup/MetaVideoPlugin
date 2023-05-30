@@ -1,17 +1,17 @@
 package com.alg.meta.plugin.video
 
+import android.app.Activity
+import android.content.Context
 import android.content.res.Configuration
+import android.media.AudioManager
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -32,6 +32,7 @@ import com.alg.meta.plugin.metaframe.base.BaseActivity
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
+import kotlin.math.abs
 
 /**
  * @Author laoyuyu
@@ -87,6 +88,24 @@ fun ExoUi(modifier: Modifier = Modifier) {
     }
     onDispose {}
   }
+  val audioService = remember {
+    context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+  }
+
+  val maxAudioVolume = remember {
+    audioService?.getStreamMaxVolume(AudioManager.STREAM_MUSIC)?:0
+  }
+  var volume = remember {
+    audioService?.getStreamVolume(AudioManager.STREAM_MUSIC)?:0
+  }
+
+  var screenBrightness = remember {
+    (context as? Activity)?.window?.attributes?.screenBrightness?:0f
+  }
+
+  val window = remember {
+    (context as? Activity)?.window
+  }
 
   val state = rememberMediaState(player = player.takeIf { setPlayer })
   val content = remember {
@@ -126,6 +145,55 @@ fun ExoUi(modifier: Modifier = Modifier) {
                }
                ControllerType.PlayerControlView -> @Composable { state ->
                  //PlayerControlViewController(state, Modifier.fillMaxSize())
+               }
+             },
+             audioVolumeChange = {offset,changeAbs->
+               if (abs(offset)>5.dp.value) {
+                 Box(Modifier.fillMaxSize(), Alignment.Center) {
+                   Slider(
+                     modifier = Modifier
+                       .align(Alignment.Center)
+                       .size(160.dp, 2.dp),
+                     value = volume.toFloat(),
+                     onValueChange = {
+                     },
+                     valueRange = 0f..maxAudioVolume.toFloat()
+                   )
+                 }
+                 var value = (maxAudioVolume*changeAbs).toInt()
+                 if (value<0){
+                   value = 0
+                 }else if (value>maxAudioVolume){
+                   value = maxAudioVolume
+                 }
+                 Log.e("www","++++++setStreamVolume")
+                 audioService?.setStreamVolume(AudioManager.STREAM_MUSIC, volume,0)
+                 volume= value
+               }
+             },
+             brightnessChange = {offset,changeAbs->
+               if (abs(offset)>5.dp.value) {
+
+                 Box(Modifier.fillMaxSize(), Alignment.Center) {
+                   Slider(
+                     modifier = Modifier
+                       .align(Alignment.Center)
+                       .size(160.dp, 2.dp),
+                     value = screenBrightness,
+                     onValueChange = {
+                     },
+                     valueRange = 0f..255f
+                   )
+                 }
+                 var value = 255*changeAbs
+                 if (value<0){
+                   value = 0f
+                 }else if (value>255){
+                   value = 255f
+                 }
+                 screenBrightness = value
+                 window?.attributes?.screenBrightness = value
+                 window?.attributes = window?.attributes
                }
              }
            )
